@@ -1,0 +1,38 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: kubernetes-dashboard-proxy
+spec:
+  ports:
+  - protocol: TCP
+    port: 443
+    targetPort: 443
+---
+kind: Endpoints
+apiVersion: v1
+metadata:
+  name: kubernetes-dashboard-proxy
+subsets:
+  - addresses:
+    - ip: 10.43.176.55 # This is definitely a hack, but it allows reusing TLS certs from the default namespace
+    ports:
+    - port: 443
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: kubernetes-dashboard
+  annotations:
+    ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  tls:
+  - hosts:
+    - kubedash.jimmyau.dev
+    secretName: jimmyau-dev-tls
+  rules:
+  - host: kubedash.jimmyau.dev
+    http:
+      paths:
+      - backend:
+          serviceName: kubernetes-dashboard-proxy
+          servicePort: 443

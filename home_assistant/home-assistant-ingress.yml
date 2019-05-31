@@ -1,0 +1,38 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: home-assistant
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+    ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  tls:
+  - hosts:
+    - home.jimmyau.com
+    secretName: jimmyau-com-tls
+  rules:
+  - host: home.jimmyau.com
+    http:
+      paths:
+      - backend:
+          serviceName: home-assistant
+          servicePort: 8123
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: hass-config
+  annotations:
+    ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  tls:
+  - hosts:
+    - hassconfig.jimmyau.dev
+    secretName: jimmyau-dev-tls
+  rules:
+  - host: hassconfig.jimmyau.dev
+    http:
+      paths:
+      - backend:
+          serviceName: hass-config
+          servicePort: 3218

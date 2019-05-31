@@ -1,0 +1,73 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: home-assistant
+  labels:
+    app: home-assistant
+spec:
+  selector:
+    app: home-assistant
+  ports:
+  - port: 8123
+    targetPort: 8123
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hass-config
+  labels:
+    app: hass-config
+spec:
+  selector:
+    app: home-assistant
+  ports:
+  - port: 3218
+    targetPort: 3218
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: home-assistant
+  labels:
+    app: home-assistant
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: home-assistant
+  template:
+    metadata:
+      labels:
+        app: home-assistant
+    spec:
+      shareProcessNamespace: true
+      hostNetwork: true
+      containers:
+      - name: home-assistant
+        image: homeassistant/raspberrypi3-homeassistant:0.90.2
+        env:
+        - name: TZ
+          value: "Asia/Hong_Kong"
+        volumeMounts:
+        - mountPath: /config
+          name: config
+        ports:
+        - containerPort: 8123
+      - name: configurator
+        image: causticlab/hass-configurator-docker:0.3.5-arm
+        env:
+        - name: HC_BASEPATH
+          value: "/config"
+        - name: HC_HASS_API
+          value: "None"
+        - name: HC_ENFORCE_BASEPATH
+          value: "true"
+        volumeMounts:
+        - mountPath: /config
+          name: config
+        ports:
+        - containerPort: 3218
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: home-assistant

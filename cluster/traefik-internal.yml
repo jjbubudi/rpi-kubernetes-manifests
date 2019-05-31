@@ -1,0 +1,113 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: traefik-internal
+  name: traefik-internal
+  namespace: kube-system
+spec:
+  externalTrafficPolicy: Local
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: http
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: 443
+  selector:
+    app: traefik-internal
+  type: LoadBalancer
+  loadBalancerIP: 10.0.1.51
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: traefik-internal
+  name: traefik-internal
+  namespace: kube-system
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: traefik-internal
+  template:
+    metadata:
+      labels:
+        app: traefik-internal
+    spec:
+      containers:
+      - args:
+        - --configfile=/config/traefik.toml
+        image: traefik:1.7.9
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 80
+          timeoutSeconds: 2
+        name: traefik
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        - containerPort: 8880
+          name: httpn
+          protocol: TCP
+        - containerPort: 443
+          name: https
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 1
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 80
+          timeoutSeconds: 2
+        volumeMounts:
+        - mountPath: /config
+          name: config
+        - mountPath: /ssl
+          name: ssl
+      serviceAccount: traefik
+      serviceAccountName: traefik
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: traefik-internal
+        name: config
+      - name: ssl
+        secret:
+          defaultMode: 420
+          secretName: traefik-default-cert
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: traefik-internal
+  namespace: kube-system
+data:
+  traefik.toml: |
+    logLevel = "INFO"
+    defaultEntryPoints = ["http","https"]
+    insecureSkipVerify = true
+    [entryPoints]
+      [entryPoints.http]
+      address = ":80"
+      compress = true
+      [entryPoints.https]
+      address = ":443"
+      compress = true
+        [entryPoints.https.tls]
+          [[entryPoints.https.tls.certificates]]
+          CertFile = "/ssl/tls.crt"
+          KeyFile = "/ssl/tls.key"
+    [kubernetes]
+    [traefikLog]
+      format = "json"
