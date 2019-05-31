@@ -1,37 +1,33 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: nats
+  name: nats-streaming
   labels:
-    component: nats
+    component: nats-streaming
 spec:
   selector:
-    component: nats
+    component: nats-streaming
   clusterIP: None
   ports:
-  - name: client
-    port: 4222
-  - name: cluster
-    port: 6222
   - name: monitor
     port: 8222
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: nats
+  name: nats-streaming
   labels:
-    component: nats
+    component: nats-streaming
 spec:
-  serviceName: nats
+  serviceName: nats-streaming
   replicas: 3
   selector:
     matchLabels:
-      component: nats
+      component: nats-streaming
   template:
     metadata:
       labels:
-        component: nats
+        component: nats-streaming
     spec:
       nodeSelector:
         node-role.kubernetes.io/node: ""
@@ -43,16 +39,30 @@ spec:
                 - key: component
                   operator: In
                   values:
-                    - nats
+                    - nats-streaming
             topologyKey: kubernetes.io/hostname
       containers:
-      - name: nats
-        image: nats:1.4.1
+      - name: nats-streaming
+        image: nats-streaming:0.14.2
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         args: [
+          "--clustered",
+          "--cluster_id", "production",
+          "--store", "FILE",
+          "--dir", "/data/store",
+          "--nats_server", "nats://nats:6222",
           "--http_port", "8222",
-          "--cluster", "nats://0.0.0.0:6222",
-          "--routes", "nats://nats:6222"
+          "--cluster_node_id", "$(POD_NAME)",
+          "--cluster_peers", "nats-streaming-0,nats-streaming-1,nats-streaming-2",
+          "--cluster_log_path", "/data/cluster-log"
         ]
+        volumeMounts:
+        - mountPath: /data
+          name: nats-streaming-data
         resources:
           limits:
             cpu: 200m
@@ -61,10 +71,6 @@ spec:
             cpu: 100m
             memory: 50Mi
         ports:
-        - containerPort: 4222
-          name: client
-        - containerPort: 6222
-          name: cluster
         - containerPort: 8222
           name: monitor
         readinessProbe:
@@ -79,3 +85,13 @@ spec:
             port: 8222
           initialDelaySeconds: 30
           timeoutSeconds: 5
+  volumeClaimTemplates:
+  - metadata:
+      name: nats-streaming-data
+    spec:
+      storageClassName: local-path
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
