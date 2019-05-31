@@ -33,6 +33,8 @@ spec:
       labels:
         component: nats
     spec:
+      nodeSelector:
+        node-role.kubernetes.io/node: ""
       affinity:
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
