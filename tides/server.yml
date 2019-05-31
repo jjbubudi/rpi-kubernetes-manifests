@@ -1,0 +1,95 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: tides-server
+  labels:
+    app: tides-server
+spec:
+  selector:
+    app: tides-server
+  clusterIP: None
+  ports:
+  - name: grpc
+    port: 50051
+  - name: grpc-web
+    port: 8080
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: tides-server
+  labels:
+    app: tides-server
+spec:
+  serviceName: tides-server
+  replicas: 2
+  selector:
+    matchLabels:
+      app: tides-server
+  template:
+    metadata:
+      labels:
+        app: tides-server
+    spec:
+      containers:
+      - name: tides-server
+        image: jjbubudi/tides:v0.3.0
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        args: [
+          "server",
+          "--nats-client-id", "$(POD_NAME)",
+          "--nats-cluster-id", "production",
+          "--nats-url", "nats://nats:4222"
+        ]
+        resources:
+          limits:
+            cpu: 200m
+            memory: 60Mi
+          requests:
+            cpu: 100m
+            memory: 30Mi
+        ports:
+        - containerPort: 50051
+          name: grpc
+        readinessProbe:
+          tcpSocket:
+            port: 50051
+          initialDelaySeconds: 10
+          timeoutSeconds: 5
+        livenessProbe:
+          tcpSocket:
+            port: 50051
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
+      - name: grpc-web-proxy
+        image: jjbubudi/grpc-web-proxy:v0.9.5
+        args: [
+          "--allow_all_origins",
+          "--backend_addr=localhost:50051",
+          "--run_tls_server=false",
+          "--backend_tls=false"
+        ]
+        resources:
+          limits:
+            cpu: 100m
+            memory: 20Mi
+          requests:
+            cpu: 50m
+            memory: 10Mi
+        ports:
+        - containerPort: 8080
+          name: grpc-web
+        readinessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 10
+          timeoutSeconds: 5
+        livenessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
