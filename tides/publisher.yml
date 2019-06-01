@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: tides-publisher
-        image: jjbubudi/tides:v0.3.0
+        image: jjbubudi/tides:v0.4.0
         args: [
           "publisher",
           "--nats-client-id", "tides-publisher",

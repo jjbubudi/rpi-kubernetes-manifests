@@ -33,7 +33,7 @@ spec:
     spec:
       containers:
       - name: tides-server
-        image: jjbubudi/tides:v0.3.0
+        image: jjbubudi/tides:v0.4.0
         env:
         - name: POD_NAME
           valueFrom:
