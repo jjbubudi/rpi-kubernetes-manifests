@@ -1,0 +1,92 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: glusterfs
+  labels:
+    component: glusterfs
+spec:
+  selector:
+    component: glusterfs
+  clusterIP: None
+  ports:
+  - name: ssh
+    port: 2222
+  - name: daemon
+    port: 24007
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: glusterfs
+  labels:
+    component: glusterfs
+spec:
+  serviceName: glusterfs
+  replicas: 3
+  selector:
+    matchLabels:
+      component: glusterfs
+  template:
+    metadata:
+      labels:
+        component: glusterfs
+    spec:
+      nodeSelector:
+        storagenode: glusterfs
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: component
+                  operator: In
+                  values:
+                    - glusterfs
+            topologyKey: kubernetes.io/hostname
+      containers:
+      - name: glusterfs
+        image: jjbubudi/glusterfs:v6.1.0
+        env:
+        - name: SSH_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: glusterfs
+              key: ssh-password
+        volumeMounts:
+        - mountPath: /data
+          name: glusterfs-data
+        resources:
+          limits:
+            cpu: 500m
+            memory: 100Mi
+          requests:
+            cpu: 100m
+            memory: 50Mi
+        ports:
+        - containerPort: 2222
+          name: ssh
+        - containerPort: 24007
+          name: daemon
+        securityContext:
+          capabilities: {}
+          privileged: true
+        readinessProbe:
+          tcpSocket:
+            port: 24007
+          initialDelaySeconds: 10
+          timeoutSeconds: 5
+        livenessProbe:
+          tcpSocket:
+            port: 24007
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
+  volumeClaimTemplates:
+  - metadata:
+      name: glusterfs-data
+    spec:
+      storageClassName: local-path
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 32Gi
