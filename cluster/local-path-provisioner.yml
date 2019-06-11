@@ -60,7 +60,7 @@ spec:
       serviceAccountName: local-path-provisioner-service-account
       containers:
       - name: local-path-provisioner
-        image: jjbubudi/local-path-provisioner:0.0.1-arm
+        image: tobiasha/local-path-provisioner:0.0.9-armhf
         imagePullPolicy: IfNotPresent
         command:
         - local-path-provisioner
