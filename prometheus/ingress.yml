@@ -1,0 +1,39 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: grafana-proxy
+spec:
+  ports:
+  - protocol: TCP
+    port: 3000
+    targetPort: 3000
+---
+kind: Endpoints
+apiVersion: v1
+metadata:
+  name: grafana-proxy
+subsets:
+  - addresses:
+    - ip: 10.43.90.162
+    ports:
+    - port: 3000
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: grafana
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+    ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  tls:
+  - hosts:
+    - grafana.jimmyau.com
+    secretName: jimmyau-com-tls
+  rules:
+  - host: grafana.jimmyau.com
+    http:
+      paths:
+      - backend:
+          serviceName: grafana-proxy
+          servicePort: 3000
