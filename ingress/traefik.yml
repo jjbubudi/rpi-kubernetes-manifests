@@ -1,12 +1,60 @@
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: traefik-ingress-controller
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - services
+      - endpoints
+      - secrets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - extensions
+    resources:
+      - ingresses
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+    - extensions
+    resources:
+    - ingresses/status
+    verbs:
+    - update
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: traefik-ingress-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: traefik-ingress-controller
+subjects:
+- kind: ServiceAccount
+  name: traefik-ingress-controller
+  namespace: kube-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: traefik-ingress-controller
+  namespace: kube-system
+---
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: traefik-internal
-  name: traefik-internal
+    app: traefik
+  name: traefik
   namespace: kube-system
 spec:
-  externalTrafficPolicy: Local
   ports:
   - name: http
     port: 80
@@ -17,26 +65,26 @@ spec:
     protocol: TCP
     targetPort: 443
   selector:
-    app: traefik-internal
+    app: traefik
   type: LoadBalancer
-  loadBalancerIP: 10.0.1.51
+  loadBalancerIP: 10.0.1.50
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: traefik-internal
-  name: traefik-internal
+    app: traefik
+  name: traefik
   namespace: kube-system
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: traefik-internal
+      app: traefik
   template:
     metadata:
       labels:
-        app: traefik-internal
+        app: traefik
     spec:
       containers:
       - args:
@@ -56,9 +104,6 @@ spec:
         - containerPort: 80
           name: http
           protocol: TCP
-        - containerPort: 8880
-          name: httpn
-          protocol: TCP
         - containerPort: 443
           name: https
           protocol: TCP
@@ -73,24 +118,17 @@ spec:
         volumeMounts:
         - mountPath: /config
           name: config
-        - mountPath: /ssl
-          name: ssl
-      serviceAccount: traefik
-      serviceAccountName: traefik
+      serviceAccountName: traefik-ingress-controller
       volumes:
       - configMap:
           defaultMode: 420
-          name: traefik-internal
+          name: traefik
         name: config
-      - name: ssl
-        secret:
-          defaultMode: 420
-          secretName: traefik-default-cert
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: traefik-internal
+  name: traefik
   namespace: kube-system
 data:
   traefik.toml: |
@@ -105,9 +143,9 @@ data:
       address = ":443"
       compress = true
         [entryPoints.https.tls]
-          [[entryPoints.https.tls.certificates]]
-          CertFile = "/ssl/tls.crt"
-          KeyFile = "/ssl/tls.key"
     [kubernetes]
+    ingressClass = "traefik-external"
+      [kubernetes.ingressEndpoint]
+      ip = "10.0.1.50"
     [traefikLog]
       format = "json"

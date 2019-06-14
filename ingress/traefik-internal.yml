@@ -1,0 +1,101 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: traefik-internal
+  name: traefik-internal
+  namespace: kube-system
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: http
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: 443
+  selector:
+    app: traefik-internal
+  type: LoadBalancer
+  loadBalancerIP: 10.0.1.51
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: traefik-internal
+  name: traefik-internal
+  namespace: kube-system
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: traefik-internal
+  template:
+    metadata:
+      labels:
+        app: traefik-internal
+    spec:
+      containers:
+      - args:
+        - --configfile=/config/traefik.toml
+        image: traefik:1.7.9
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 80
+          timeoutSeconds: 2
+        name: traefik
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        - containerPort: 443
+          name: https
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 1
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 80
+          timeoutSeconds: 2
+        volumeMounts:
+        - mountPath: /config
+          name: config
+      serviceAccountName: traefik-ingress-controller
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: traefik-internal
+        name: config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: traefik-internal
+  namespace: kube-system
+data:
+  traefik.toml: |
+    logLevel = "INFO"
+    defaultEntryPoints = ["http","https"]
+    insecureSkipVerify = true
+    [entryPoints]
+      [entryPoints.http]
+      address = ":80"
+      compress = true
+      [entryPoints.https]
+      address = ":443"
+      compress = true
+        [entryPoints.https.tls]
+    [kubernetes]
+      [kubernetes.ingressEndpoint]
+      ip = "10.0.1.51"
+    [traefikLog]
+      format = "json"
