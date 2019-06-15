@@ -96,6 +96,6 @@ data:
         [entryPoints.https.tls]
     [kubernetes]
       [kubernetes.ingressEndpoint]
-      ip = "10.0.1.51"
+      publishedService = "kube-system/traefik-internal"
     [traefikLog]
       format = "json"

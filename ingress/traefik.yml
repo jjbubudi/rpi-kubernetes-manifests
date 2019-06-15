@@ -146,6 +146,6 @@ data:
     [kubernetes]
     ingressClass = "traefik-external"
       [kubernetes.ingressEndpoint]
-      ip = "10.0.1.50"
+      publishedService = "kube-system/traefik"
     [traefikLog]
       format = "json"
