@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: home-assistant
 data:
-  configuration.yaml: |
+  configuration.yaml: |-
     homeassistant:
       name: Home
       latitude: 22.3833
