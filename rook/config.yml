@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rook-config-override
+  namespace: rook-ceph
+data:
+  config: |
+    [global]
+    mon_cluster_log_file_level = info
+    mon_cluster_log_file = /dev/null
+    mon_cluster_log_to_stderr = false
+    log_file = /dev/null
+    log_to_stderr = false
+    clog_to_monitors = false
+    ms_learn_addr_from_peer = false
+    [mon]
+    debug_rocksdb = 0
