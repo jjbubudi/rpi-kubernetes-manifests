@@ -89,7 +89,7 @@ spec:
   - metadata:
       name: nats-streaming-data
     spec:
-      storageClassName: rook-ceph-block
+      storageClassName: local-path
       accessModes:
       - ReadWriteOnce
       resources:

@@ -20,7 +20,7 @@ metadata:
   name: grafana
   namespace: kube-system
 spec:
-  storageClassName: rook-ceph-block
+  storageClassName: local-path
   accessModes:
   - ReadWriteOnce
   resources:
