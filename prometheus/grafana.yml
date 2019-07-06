@@ -14,6 +14,19 @@ spec:
   selector:
     k8s-app: grafana
 ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: grafana
+  namespace: kube-system
+spec:
+  storageClassName: rook-ceph-block
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -29,6 +42,8 @@ spec:
       labels:
         k8s-app: grafana
     spec:
+      securityContext:
+        fsGroup: 472 # This is the user id used by Grafana
       containers:
       - name: grafana
         image: grafana/grafana:6.2.2
@@ -46,14 +61,15 @@ spec:
           value: "3000"
         resources:
             limits:
-              cpu: 100m
+              cpu: 200m
               memory: 50Mi
             requests:
-              cpu: 50m
+              cpu: 100m
               memory: 30Mi
       volumes:
       - name: ca-certificates
         hostPath:
           path: /etc/ssl/certs
       - name: grafana-storage
-        emptyDir: {}
+        persistentVolumeClaim:
+          claimName: grafana
