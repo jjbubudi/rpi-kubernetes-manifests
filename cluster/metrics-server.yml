@@ -115,7 +115,7 @@ spec:
         - --logtostderr
         - --kubelet-insecure-tls
         - --kubelet-preferred-address-types=InternalIP
-        image: k8s.gcr.io/metrics-server-arm:v0.3.2
+        image: k8s.gcr.io/metrics-server-arm64:v0.3.2
         imagePullPolicy: IfNotPresent
         volumeMounts:
         - name: tmp-dir
