@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: home-assistant
+data:
+  configuration.yaml: |
+    homeassistant:
+      name: Home
+      latitude: 22.3833
+      longitude: 114.1833
+      elevation: 0
+      unit_system: metric
+      time_zone: Asia/Hong_Kong
+    default_config:
+    recorder:
+    sensor:
+      - platform: yr
+      - platform: mitemp_bt
+        mac: '4C:65:A8:DC:C3:FF'
