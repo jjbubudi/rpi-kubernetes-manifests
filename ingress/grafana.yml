@@ -14,7 +14,7 @@ metadata:
   name: grafana-proxy
 subsets:
   - addresses:
-    - ip: 10.43.90.162
+    - ip: 10.43.100.1
     ports:
     - port: 3000
 ---
