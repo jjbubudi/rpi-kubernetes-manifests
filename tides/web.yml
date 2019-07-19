@@ -29,7 +29,7 @@ spec:
     spec:
       containers:
       - name: tides-web
-        image: jjbubudi/tides-web:v0.1.0
+        image: jjbubudi/tides-web:v0.2.0
         resources:
           limits:
             cpu: 100m
