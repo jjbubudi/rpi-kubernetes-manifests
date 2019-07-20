@@ -43,7 +43,7 @@ spec:
             topologyKey: kubernetes.io/hostname
       containers:
       - name: nats-streaming
-        image: nats-streaming:0.14.2
+        image: nats-streaming:0.15.1
         env:
         - name: POD_NAME
           valueFrom:
