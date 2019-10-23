@@ -273,7 +273,7 @@ spec:
       serviceAccountName: prometheus
       containers:
         - name: prometheus-server
-          image: prom/prometheus:v2.10.0
+          image: prom/prometheus:v2.13.1
           imagePullPolicy: IfNotPresent
           args:
             - --config.file=/etc/config/prometheus.yml
@@ -298,8 +298,8 @@ spec:
             timeoutSeconds: 30
           resources:
             limits:
-              cpu: 400m
-              memory: 400Mi
+              cpu: 800m
+              memory: 500Mi
             requests:
               cpu: 200m
               memory: 300Mi
