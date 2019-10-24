@@ -89,7 +89,7 @@ spec:
       containers:
       - args:
         - --configfile=/config/traefik.toml
-        image: traefik:1.7.9
+        image: traefik:1.7.18
         imagePullPolicy: IfNotPresent
         livenessProbe:
           failureThreshold: 3
