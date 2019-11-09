@@ -1,0 +1,44 @@
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: tides-fetch-realtime
+spec:
+  schedule: "*/2 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: tides-fetcher
+            image: jjbubudi/tides:v0.8.0
+            args: [
+              "fetch",
+              "realtime",
+              "--nats-client-id", "tides-fetch-realtime",
+              "--nats-cluster-id", "production",
+              "--nats-url", "nats://nats:4222"
+            ]
+          restartPolicy: OnFailure
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: tides-fetch-predicted
+spec:
+  schedule: "0 17 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: tides-fetcher
+            image: jjbubudi/tides:v0.8.0
+            args: [
+              "fetch",
+              "predicted",
+              "--nats-client-id", "tides-fetch-predicted",
+              "--nats-cluster-id", "production",
+              "--nats-url", "nats://nats:4222"
+            ]
+          restartPolicy: OnFailure
