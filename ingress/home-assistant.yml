@@ -1,19 +1,15 @@
-apiVersion: extensions/v1beta1
-kind: Ingress
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
 metadata:
   name: home-assistant
   annotations:
     kubernetes.io/ingress.class: traefik-external
-    ingress.kubernetes.io/ssl-redirect: "true"
 spec:
+  routes:
+  - kind: Rule
+    match: Host(`home.jimmyau.com`)
+    services:
+    - name: home-assistant
+      port: 8123
   tls:
-  - hosts:
-    - home.jimmyau.com
     secretName: jimmyau-com-tls
-  rules:
-  - host: home.jimmyau.com
-    http:
-      paths:
-      - backend:
-          serviceName: home-assistant
-          servicePort: 8123

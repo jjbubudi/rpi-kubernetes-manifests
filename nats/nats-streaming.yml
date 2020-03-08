@@ -29,8 +29,6 @@ spec:
       labels:
         component: nats-streaming
     spec:
-      nodeSelector:
-        node-role.kubernetes.io/node: ""
       affinity:
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -43,7 +41,7 @@ spec:
             topologyKey: kubernetes.io/hostname
       containers:
       - name: nats-streaming
-        image: nats-streaming:0.16.2
+        image: nats-streaming:0.17.0
         env:
         - name: POD_NAME
           valueFrom:
@@ -66,7 +64,7 @@ spec:
         resources:
           limits:
             cpu: 200m
-            memory: 100Mi
+            memory: 80Mi
           requests:
             cpu: 100m
             memory: 50Mi

@@ -1,23 +1,22 @@
-apiVersion: extensions/v1beta1
-kind: Ingress
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
 metadata:
-  name: tides-web
+  name: tides
   annotations:
     kubernetes.io/ingress.class: traefik-external
-    ingress.kubernetes.io/ssl-redirect: "true"
 spec:
+  routes:
+  - kind: Rule
+    match: Host(`tides.jimmyau.com`)
+    priority: 1
+    services:
+    - name: tides-web
+      port: 80
+  - kind: Rule
+    match: Host(`tides.jimmyau.com`) && Method(`POST`)
+    priority: 2
+    services:
+    - name: tides-server
+      port: 8080
   tls:
-  - hosts:
-    - tides.jimmyau.com
     secretName: jimmyau-com-tls
-  rules:
-  - host: tides.jimmyau.com
-    http:
-      paths:
-      - path: /jimmyau.tides.TidesService
-        backend:
-          serviceName: tides-server
-          servicePort: 8080
-      - backend:
-          serviceName: tides-web
-          servicePort: 80

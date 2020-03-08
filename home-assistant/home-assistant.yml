@@ -11,6 +11,18 @@ spec:
   - port: 8123
     targetPort: 8123
 ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: home-assistant
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 500M
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -29,30 +41,24 @@ spec:
     spec:
       shareProcessNamespace: true
       hostNetwork: true
-      nodeSelector:
-        bluetooth: "on"
-      tolerations:
-      - key: "node-role.kubernetes.io/master"
-        operator: "Exists"
-        effect: "NoSchedule"
       containers:
       - name: home-assistant
-        image: homeassistant/raspberrypi3-homeassistant:0.95.4
+        image: homeassistant/raspberrypi3-homeassistant:0.106.5
         env:
         - name: TZ
           value: "Asia/Hong_Kong"
         volumeMounts:
-        - name: storage
-          mountPath: /config
+        - mountPath: /config
+          name: config
         - name: home-assistant-config
           mountPath: /config/configuration.yaml
           subPath: configuration.yaml
         ports:
         - containerPort: 8123
       volumes:
-        - name: storage
-          hostPath:
-            path: /var/lib/hass
+        - name: config
+          persistentVolumeClaim:
+            claimName: home-assistant
         - name: home-assistant-config
           configMap:
             name: home-assistant

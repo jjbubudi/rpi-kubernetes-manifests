@@ -1,0 +1,25 @@
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: jimmyau-com
+spec:
+  secretName: jimmyau-com-tls
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt
+  dnsNames:
+    - "*.jimmyau.com"
+    - jimmyau.com
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: jimmyau-dev
+spec:
+  secretName: jimmyau-dev-tls
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt
+  dnsNames:
+    - "*.jimmyau.dev"
+    - jimmyau.dev

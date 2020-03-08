@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: traefik
+  name: traefik-external
   namespace: kube-system
 spec:
   selector:
-    app: traefik
+    app: traefik-external
   type: LoadBalancer
-  loadBalancerIP: 10.0.1.51
+  loadBalancerIP: 10.0.1.50
   externalTrafficPolicy: Local
   ports:
     - protocol: TCP
@@ -23,18 +23,18 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   namespace: kube-system
-  name: traefik
+  name: traefik-external
   labels:
-    app: traefik
+    app: traefik-external
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: traefik
+      app: traefik-external
   template:
     metadata:
       labels:
-        app: traefik
+        app: traefik-external
     spec:
       serviceAccountName: traefik-ingress-controller
       containers:
@@ -44,6 +44,7 @@ spec:
             - --entrypoints.web.Address=:80
             - --entrypoints.websecure.Address=:443
             - --providers.kubernetescrd
+            - --providers.kubernetescrd.ingressclass=traefik-external
           resources:
             limits:
               cpu: 200m
