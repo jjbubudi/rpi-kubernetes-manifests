@@ -1,0 +1,134 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-cluster
+  labels:
+    application: patroni
+    cluster-name: postgres
+spec:
+  clusterIP: None
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  labels:
+    application: patroni
+    cluster-name: postgres
+spec:
+  replicas: 2
+  serviceName: postgres-cluster
+  selector:
+    matchLabels:
+      application: patroni
+      cluster-name: postgres
+  template:
+    metadata:
+      labels:
+        application: patroni
+        cluster-name: postgres
+    spec:
+      serviceAccountName: patroni
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: cluster-name
+                  operator: In
+                  values:
+                    - postgres
+            topologyKey: kubernetes.io/hostname
+      containers:
+      - name: postgres
+        image: jjbubudi/postgres-cluster:v0.1.0-12.2
+        resources:
+          limits:
+            cpu: '1'
+            memory: 200Mi
+          requests:
+            cpu: '1'
+            memory: 200Mi
+        ports:
+        - containerPort: 8008
+          protocol: TCP
+        - containerPort: 5432
+          protocol: TCP
+        readinessProbe:
+          tcpSocket:
+            port: 5432
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: pgdata
+        env:
+        - name: ADVERTISE_ADDRESS
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: PATRONI_KUBERNETES_POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: PATRONI_KUBERNETES_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: PATRONI_KUBERNETES_USE_ENDPOINTS
+          value: 'true'
+        - name: PATRONI_KUBERNETES_LABELS
+          value: '{application: patroni, cluster-name: postgres}'
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres
+              key: superuser-password
+        - name: REPLICATION_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres
+              key: replication-password
+        - name: REWIND_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres
+              key: rewind-password
+        - name: PATRONI_SCOPE
+          value: postgres
+        - name: PATRONI_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+  volumeClaimTemplates:
+  - metadata:
+      name: pgdata
+    spec:
+      storageClassName: local-path
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: postgres
+  labels:
+    application: patroni
+    cluster-name: postgres
+subsets: []
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  labels:
+    application: patroni
+    cluster-name: postgres
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5432
+    targetPort: 5432
