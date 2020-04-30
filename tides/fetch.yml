@@ -17,7 +17,7 @@ spec:
               "realtime",
               "--nats-client-id", "tides-fetch-realtime",
               "--nats-cluster-id", "production",
-              "--nats-url", "nats://nats:4222"
+              "--nats-url", "nats://nats.default.svc.cluster.local:4222"
             ]
           restartPolicy: OnFailure
 ---
@@ -39,6 +39,6 @@ spec:
               "predicted",
               "--nats-client-id", "tides-fetch-predicted",
               "--nats-cluster-id", "production",
-              "--nats-url", "nats://nats:4222"
+              "--nats-url", "nats://nats.default.svc.cluster.local:4222"
             ]
           restartPolicy: OnFailure

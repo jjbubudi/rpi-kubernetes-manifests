@@ -18,7 +18,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
-  storageClassName: local-path
+  storageClassName: openebs-jiva
   resources:
     requests:
       storage: 500M
@@ -31,6 +31,8 @@ metadata:
     app: home-assistant
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: home-assistant
@@ -43,7 +45,7 @@ spec:
       hostNetwork: true
       containers:
       - name: home-assistant
-        image: homeassistant/raspberrypi3-homeassistant:0.106.5
+        image: homeassistant/raspberrypi3-homeassistant:0.109.0
         env:
         - name: TZ
           value: "Asia/Hong_Kong"

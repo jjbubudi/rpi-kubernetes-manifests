@@ -52,7 +52,7 @@ spec:
           "--cluster_id", "production",
           "--store", "FILE",
           "--dir", "/data/store",
-          "--nats_server", "nats://nats:6222",
+          "--nats_server", "nats://nats.default.svc.cluster.local:6222",
           "--http_port", "8222",
           "--cluster_node_id", "$(POD_NAME)",
           "--cluster_peers", "nats-streaming-0,nats-streaming-1,nats-streaming-2",

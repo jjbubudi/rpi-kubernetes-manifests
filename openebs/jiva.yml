@@ -1,0 +1,21 @@
+apiVersion: openebs.io/v1alpha1
+kind: StoragePool
+metadata:
+    name: usbpool            
+    type: hostdir
+spec:
+    path: "/mnt/drive/jiva"
+provisioner: null
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: openebs-jiva
+  annotations:
+    openebs.io/cas-type: jiva
+    cas.openebs.io/config: |
+      - name: ReplicaCount
+        value: "3"
+      - name: StoragePool
+        value: usbpool
+provisioner: openebs.io/provisioner-iscsi

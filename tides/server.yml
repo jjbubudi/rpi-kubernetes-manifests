@@ -44,7 +44,7 @@ spec:
           "start",
           "--nats-client-id", "$(POD_NAME)",
           "--nats-cluster-id", "production",
-          "--nats-url", "nats://nats:4222"
+          "--nats-url", "nats://nats.default.svc.cluster.local:4222"
         ]
         resources:
           limits:
