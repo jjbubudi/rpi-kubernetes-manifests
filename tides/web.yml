@@ -26,16 +26,18 @@ spec:
     metadata:
       labels:
         app: tides-web
+      annotations:
+        linkerd.io/inject: enabled
     spec:
       containers:
       - name: tides-web
         image: jjbubudi/tides-web:v0.2.0
         resources:
           limits:
-            cpu: 100m
-            memory: 30Mi
+            cpu: 200m
+            memory: 40Mi
           requests:
-            cpu: 50m
+            cpu: 100m
             memory: 20Mi
         ports:
         - containerPort: 80

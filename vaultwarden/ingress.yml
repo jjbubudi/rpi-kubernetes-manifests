@@ -1,0 +1,16 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: vaultwarden
+spec:
+  routes:
+  - kind: Rule
+    match: Host(`password.jimmyau.cloud`) && Path(`/notifications/hub`)
+    services:
+    - name: vaultwarden
+      port: 3012
+  - kind: Rule
+    match: Host(`password.jimmyau.cloud`)
+    services:
+    - name: vaultwarden
+      port: 80

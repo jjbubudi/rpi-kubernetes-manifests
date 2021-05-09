@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: vaultwarden
+  labels:
+    app: vaultwarden
+spec:
+  selector:
+    app: vaultwarden
+  ports:
+  - name: web
+    port: 80
+  - name: websocket
+    port: 3012
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vaultwarden
+  labels:
+    app: vaultwarden
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vaultwarden
+  template:
+    metadata:
+      labels:
+        app: vaultwarden
+      annotations:
+        linkerd.io/inject: enabled
+    spec:
+      containers:
+      - name: vaultwarden
+        image: vaultwarden/server:1.21.0
+        env:
+        - name: WEBSOCKET_ENABLED
+          value: 'true'
+        resources:
+          limits:
+            cpu: 500m
+            memory: 80Mi
+          requests:
+            cpu: 100m
+            memory: 20Mi
+        ports:
+        - containerPort: 80
+        - containerPort: 3012

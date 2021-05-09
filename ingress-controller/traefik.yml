@@ -1,28 +1,6 @@
-apiVersion: v1
-kind: Service
-metadata:
-  name: traefik
-  namespace: kube-system
-spec:
-  selector:
-    app: traefik
-  type: LoadBalancer
-  loadBalancerIP: 10.0.1.51
-  externalTrafficPolicy: Local
-  ports:
-    - protocol: TCP
-      name: web
-      port: 80
-      targetPort: web
-    - protocol: TCP
-      name: websecure
-      port: 443
-      targetPort: web
----
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  namespace: kube-system
   name: traefik
   labels:
     app: traefik
@@ -35,26 +13,48 @@ spec:
     metadata:
       labels:
         app: traefik
+      annotations:
+        linkerd.io/inject: enabled
     spec:
       serviceAccountName: traefik-ingress-controller
       containers:
-        - name: traefik
-          image: traefik:v2.1.6
-          args:
-            - --entrypoints.web.Address=:80
-            - --entrypoints.websecure.Address=:443
-            - --providers.kubernetescrd
+        - name: cloudflared
+          image: msnelling/cloudflared:2021.4.0
+          command: ["/usr/local/bin/cloudflared"]
+          args: [
+            "tunnel",
+            "--no-autoupdate",
+            "--cred-file", "/secrets/cred.json",
+            "--url", "localhost:80",
+            "run", "ingress"
+          ]
+          volumeMounts:
+          - name: cf-tunnel-cred
+            mountPath: /secrets/cred.json
+            subPath: cred.json
           resources:
             limits:
-              cpu: 200m
-              memory: 35Mi
+              cpu: 300m
+              memory: 40Mi
             requests:
               cpu: 100m
               memory: 20Mi
+        - name: traefik
+          image: traefik:v2.4.8
+          args:
+            - --entrypoints.web.Address=:80
+            - --providers.kubernetescrd
+          resources:
+            limits:
+              cpu: 500m
+              memory: 100Mi
+            requests:
+              cpu: 100m
+              memory: 50Mi
           ports:
             - name: web
               containerPort: 80
-            - name: websecure
-              containerPort: 443
-            - name: admin
-              containerPort: 8080
+      volumes:
+        - name: cf-tunnel-cred
+          secret:
+            secretName: cf-tunnel-cred
