@@ -1,0 +1,11 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: vault
+spec:
+  routes:
+  - kind: Rule
+    match: Host(`vault.jimmyau.cloud`)
+    services:
+    - name: vault-ui
+      port: 8200

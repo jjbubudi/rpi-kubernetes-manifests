@@ -1,0 +1,62 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: vault
+  namespace: default
+spec:
+  repo: https://helm.releases.hashicorp.com
+  chart: vault
+  version: 0.11.0
+  targetNamespace: default
+  valuesContent: |-
+    injector:
+      annotations:
+        "linkerd.io/inject": "enabled"
+        "config.linkerd.io/skip-inbound-ports": "8080"
+    ui:
+      enabled: true
+      activeVaultPodOnly: true
+    server:
+      image:
+        repository: "vault"
+        tag: "1.7.1"
+      tolerations: |
+      - key: "SelectedOnly"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+      nodeSelector: |
+        purpose: dedicated
+      annotations:
+        "linkerd.io/inject": "enabled"
+        "config.linkerd.io/skip-inbound-ports": "8201"
+        "config.linkerd.io/skip-outbound-ports": "8201"
+      readinessProbe:
+        path: /v1/sys/health?standbyok=true
+      ha:
+        enabled: true
+        raft:
+          enabled: true
+          setNodeId: true
+          config: |
+            ui = true
+            service_registration "kubernetes" {}
+
+            listener "tcp" {
+              tls_disable = 1
+              address = "[::]:8200"
+              cluster_address = "[::]:8201"
+            }
+
+            storage "raft" {
+              path = "/vault/data"
+              retry_join {
+                leader_api_addr = "http://vault-0.vault-internal.default.svc.cluster.local:8200"
+              }
+              retry_join {
+                leader_api_addr = "http://vault-1.vault-internal.default.svc.cluster.local:8200"
+              }
+              retry_join {
+                leader_api_addr = "http://vault-2.vault-internal.default.svc.cluster.local:8200"
+              }
+            }

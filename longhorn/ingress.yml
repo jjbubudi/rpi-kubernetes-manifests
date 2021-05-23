@@ -1,0 +1,12 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: vault
+  namespace: longhorn-system
+spec:
+  routes:
+  - kind: Rule
+    match: Host(`longhorn.jimmyau.cloud`)
+    services:
+    - name: longhorn-frontend
+      port: 80
