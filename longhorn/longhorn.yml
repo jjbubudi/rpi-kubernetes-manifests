@@ -11,6 +11,7 @@ spec:
   valuesContent: |-
     persistence:
       defaultClass: false
+      defaultClassReplicaCount: 2
     defaultSettings:
       defaultDataLocality: best-effort
       backupTarget: s3://jimmyau-longhorn-backup@us-west-002/
