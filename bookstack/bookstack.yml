@@ -52,21 +52,23 @@ spec:
         - mountPath: /config
           name: data
         readinessProbe:
-          tcpSocket:
+          httpGet:
+            path: /status
             port: 80
           initialDelaySeconds: 10
           timeoutSeconds: 5
         livenessProbe:
-          tcpSocket:
+          httpGet:
+            path: /status
             port: 80
           initialDelaySeconds: 30
           timeoutSeconds: 5
         resources:
           limits:
-            cpu: 600m
+            cpu: 1
             memory: 300Mi
           requests:
-            cpu: 100m
+            cpu: 300m
             memory: 100Mi
       volumes:
       - name: secrets
