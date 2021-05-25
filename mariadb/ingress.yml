@@ -1,0 +1,22 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: phpmyadmin-middleware
+spec:
+  headers:
+    customRequestHeaders:
+      X-Forwarded-Proto: https
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: phpmyadmin
+spec:
+  routes:
+  - kind: Rule
+    match: Host(`db.jimmyau.cloud`)
+    middlewares:
+    - name: phpmyadmin-middleware
+    services:
+    - name: phpmyadmin
+      port: 80

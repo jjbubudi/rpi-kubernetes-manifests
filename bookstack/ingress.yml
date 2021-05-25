@@ -1,0 +1,11 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: bookstack
+spec:
+  routes:
+  - kind: Rule
+    match: Host(`wiki.jimmyau.cloud`)
+    services:
+    - name: bookstack
+      port: 80
