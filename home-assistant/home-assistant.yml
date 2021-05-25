@@ -11,28 +11,17 @@ spec:
   - port: 8123
     targetPort: 8123
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: home-assistant
-spec:
-  accessModes:
-    - ReadWriteOnce
-  storageClassName: openebs-jiva
-  resources:
-    requests:
-      storage: 500M
----
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: home-assistant
   labels:
     app: home-assistant
 spec:
+  serviceName: home-assistant
   replicas: 1
-  strategy:
-    type: Recreate
+  updateStrategy:
+    type: RollingUpdate
   selector:
     matchLabels:
       app: home-assistant
@@ -40,27 +29,22 @@ spec:
     metadata:
       labels:
         app: home-assistant
+      annotations:
+        linkerd.io/inject: enabled
     spec:
-      shareProcessNamespace: true
-      hostNetwork: true
       containers:
       - name: home-assistant
-        image: homeassistant/raspberrypi3-homeassistant:0.109.0
+        image: homeassistant/home-assistant:2021.5.5
         env:
         - name: TZ
-          value: "Asia/Hong_Kong"
+          value: "America/Vancouver"
         volumeMounts:
-        - mountPath: /config
-          name: config
         - name: home-assistant-config
           mountPath: /config/configuration.yaml
           subPath: configuration.yaml
         ports:
         - containerPort: 8123
       volumes:
-        - name: config
-          persistentVolumeClaim:
-            claimName: home-assistant
         - name: home-assistant-config
           configMap:
             name: home-assistant
