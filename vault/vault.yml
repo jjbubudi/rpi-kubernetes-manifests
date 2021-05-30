@@ -20,11 +20,13 @@ spec:
       image:
         repository: "vault"
         tag: "1.7.1"
+      updateStrategyType: "RollingUpdate"
+      extraArgs: "-config=/secrets/storage.hcl -config=/secrets/seal.hcl"
       tolerations: |
-      - key: "SelectedOnly"
-        operator: "Equal"
-        value: "true"
-        effect: "NoSchedule"
+        - key: "SelectedOnly"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
       nodeSelector: |
         purpose: dedicated
       annotations:
@@ -33,30 +35,22 @@ spec:
         "config.linkerd.io/skip-outbound-ports": "8201"
       readinessProbe:
         path: /v1/sys/health?standbyok=true
+      volumes:
+      - name: secrets
+        secret:
+          secretName: vault
+      volumeMounts:
+      - name: secrets
+        mountPath: /secrets
+        readOnly: true
       ha:
         enabled: true
-        raft:
-          enabled: true
-          setNodeId: true
-          config: |
-            ui = true
-            service_registration "kubernetes" {}
+        config: |
+          ui = true
+          service_registration "kubernetes" {}
 
-            listener "tcp" {
-              tls_disable = 1
-              address = "[::]:8200"
-              cluster_address = "[::]:8201"
-            }
-
-            storage "raft" {
-              path = "/vault/data"
-              retry_join {
-                leader_api_addr = "http://vault-0.vault-internal.default.svc.cluster.local:8200"
-              }
-              retry_join {
-                leader_api_addr = "http://vault-1.vault-internal.default.svc.cluster.local:8200"
-              }
-              retry_join {
-                leader_api_addr = "http://vault-2.vault-internal.default.svc.cluster.local:8200"
-              }
-            }
+          listener "tcp" {
+            tls_disable = 1
+            address = "[::]:8200"
+            cluster_address = "[::]:8201"
+          }
