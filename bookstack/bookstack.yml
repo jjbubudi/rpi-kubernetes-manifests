@@ -51,18 +51,6 @@ spec:
           readOnly: true
         - mountPath: /config
           name: data
-        readinessProbe:
-          httpGet:
-            path: /status
-            port: 80
-          initialDelaySeconds: 10
-          timeoutSeconds: 5
-        livenessProbe:
-          httpGet:
-            path: /status
-            port: 80
-          initialDelaySeconds: 30
-          timeoutSeconds: 5
         resources:
           limits:
             memory: 300Mi
