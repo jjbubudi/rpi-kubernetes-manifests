@@ -6,7 +6,7 @@ metadata:
 spec:
   repo: https://charts.longhorn.io
   chart: longhorn
-  version: 1.1.1
+  version: 1.2.3
   targetNamespace: longhorn-system
   valuesContent: |-
     persistence:
