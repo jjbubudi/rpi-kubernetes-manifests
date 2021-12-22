@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cf-config
+data:
+  config.yaml: |-
+    credentials-file: /secrets/cred.json
+    ingress:
+      - service: http://localhost:80
+    warp-routing:
+      enabled: true

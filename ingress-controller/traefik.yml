@@ -19,16 +19,18 @@ spec:
       serviceAccountName: traefik-ingress-controller
       containers:
         - name: cloudflared
-          image: msnelling/cloudflared:2021.4.0
+          image: msnelling/cloudflared:2021.12.2
           command: ["/usr/local/bin/cloudflared"]
           args: [
             "tunnel",
             "--no-autoupdate",
-            "--cred-file", "/secrets/cred.json",
-            "--url", "localhost:80",
+            "--config", "/secrets/config.yaml",
             "run", "ingress"
           ]
           volumeMounts:
+          - name: cf-config
+            mountPath: /secrets/config.yaml
+            subPath: config.yaml
           - name: cf-tunnel-cred
             mountPath: /secrets/cred.json
             subPath: cred.json
@@ -55,6 +57,9 @@ spec:
             - name: web
               containerPort: 80
       volumes:
+        - name: cf-config
+          configMap:
+            name: cf-config
         - name: cf-tunnel-cred
           secret:
             secretName: cf-tunnel-cred
