@@ -6,7 +6,7 @@ metadata:
 spec:
   repo: https://helm.releases.hashicorp.com
   chart: vault
-  version: 0.11.0
+  version: 0.18.0
   targetNamespace: default
   valuesContent: |-
     injector:
@@ -17,9 +17,6 @@ spec:
       enabled: true
       activeVaultPodOnly: true
     server:
-      image:
-        repository: "vault"
-        tag: "1.7.1"
       updateStrategyType: "RollingUpdate"
       extraArgs: "-config=/secrets/storage.hcl -config=/secrets/seal.hcl"
       tolerations: |
