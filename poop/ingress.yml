@@ -1,0 +1,11 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: poop
+spec:
+  routes:
+  - kind: Rule
+    match: Host(`poop.jimmyau.cloud`)
+    services:
+    - name: poop
+      port: 80
