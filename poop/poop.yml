@@ -31,7 +31,7 @@ spec:
     spec:
       containers:
       - name: poop
-        image: jjbubudi/poop:0.0.2
+        image: jjbubudi/poop:0.0.3
         volumeMounts:
         - name: secrets
           mountPath: /app/.env.local
