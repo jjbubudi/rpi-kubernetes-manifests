@@ -6,7 +6,7 @@ metadata:
 spec:
   repo: https://charts.longhorn.io
   chart: longhorn
-  version: 1.2.3
+  version: 1.3.1
   targetNamespace: longhorn-system
   valuesContent: |-
     persistence:
@@ -14,5 +14,5 @@ spec:
       defaultClassReplicaCount: 2
     defaultSettings:
       defaultDataLocality: best-effort
-      backupTarget: s3://jimmyau-longhorn-backup@us-west-002/
+      backupTarget: s3://longhorn-backup@auto/
       backupTargetCredentialSecret: backup-target-credential
