@@ -31,8 +31,6 @@ spec:
     metadata:
       labels:
         app: vaultwarden
-      annotations:
-        linkerd.io/inject: enabled
     spec:
       containers:
       - name: vaultwarden

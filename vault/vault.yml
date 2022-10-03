@@ -9,10 +9,6 @@ spec:
   version: 0.18.0
   targetNamespace: default
   valuesContent: |-
-    injector:
-      annotations:
-        "linkerd.io/inject": "enabled"
-        "config.linkerd.io/skip-inbound-ports": "8080"
     ui:
       enabled: true
       activeVaultPodOnly: true
@@ -26,10 +22,6 @@ spec:
           effect: "NoSchedule"
       nodeSelector: |
         purpose: dedicated
-      annotations:
-        "linkerd.io/inject": "enabled"
-        "config.linkerd.io/skip-inbound-ports": "8201"
-        "config.linkerd.io/skip-outbound-ports": "8201"
       readinessProbe:
         path: /v1/sys/health?standbyok=true
       volumes:
