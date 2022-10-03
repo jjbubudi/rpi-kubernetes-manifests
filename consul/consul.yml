@@ -1,0 +1,32 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: consul
+  namespace: consul
+spec:
+  repo: https://helm.releases.hashicorp.com
+  chart: consul
+  version: 0.49.0
+  targetNamespace: consul
+  valuesContent: |-
+    global:
+      name: consul
+      gossipEncryption:
+        autoGenerate: true
+      tls:
+        enabled: true
+        enableAutoEncrypt: true
+      acls:
+        manageSystemACLs: true
+    server:
+      replicas: 3
+      storageClass: local-path
+      connect: true
+    client:
+      enabled: true
+    ui:
+      enabled: true
+    connectInject:
+      enabled: true
+    controller:
+      enabled: true

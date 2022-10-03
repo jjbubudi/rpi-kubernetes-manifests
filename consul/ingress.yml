@@ -1,0 +1,23 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: ServersTransport
+metadata:
+  name: consul-transport
+  namespace: consul
+spec:
+  serverName: consul-server
+  rootCAsSecrets:
+    - consul-ca-cert
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: consul
+  namespace: consul
+spec:
+  routes:
+  - kind: Rule
+    match: Host(`consul.jimmyau.cloud`)
+    services:
+    - name: consul-server
+      port: 8501
+      serversTransport: consul-transport
