@@ -13,14 +13,11 @@ spec:
     metadata:
       labels:
         app: traefik
-      annotations:
-        linkerd.io/inject: enabled
     spec:
       serviceAccountName: traefik-ingress-controller
       containers:
         - name: cloudflared
-          image: msnelling/cloudflared:2021.12.2
-          command: ["/usr/local/bin/cloudflared"]
+          image: cloudflare/cloudflared:1234-e9a2c85671d9
           args: [
             "tunnel",
             "--no-autoupdate",
@@ -42,7 +39,7 @@ spec:
               cpu: 100m
               memory: 20Mi
         - name: traefik
-          image: traefik:v2.4.8
+          image: traefik:v2.8.8
           args:
             - --entrypoints.web.Address=:80
             - --providers.kubernetescrd
