@@ -1,3 +1,8 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: traefik
+---
 kind: Deployment
 apiVersion: apps/v1
 metadata:
@@ -14,7 +19,7 @@ spec:
       labels:
         app: traefik
     spec:
-      serviceAccountName: traefik-ingress-controller
+      serviceAccountName: traefik
       containers:
         - name: cloudflared
           image: cloudflare/cloudflared:1234-e9a2c85671d9

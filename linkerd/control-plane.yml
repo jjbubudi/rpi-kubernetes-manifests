@@ -1,0 +1,45 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: linkerd-identity-trust-roots
+  namespace: linkerd
+  labels:
+    linkerd.io/control-plane-component: identity
+    linkerd.io/control-plane-ns: linkerd
+data:
+  ca-bundle.crt: |-
+    -----BEGIN CERTIFICATE-----
+    MIIBjTCCATSgAwIBAgIRAPvkAUlgVcSNT76Fr6a6xl4wCgYIKoZIzj0EAwIwJTEj
+    MCEGA1UEAxMacm9vdC5saW5rZXJkLmNsdXN0ZXIubG9jYWwwHhcNMjIxMDA0MDYw
+    ODMzWhcNNDIxMDA0MDYwODMzWjAlMSMwIQYDVQQDExpyb290LmxpbmtlcmQuY2x1
+    c3Rlci5sb2NhbDBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABO62cAU85X6GSk7y
+    CkydUsx/vUWMBA1GccD4zBFyay66x9hz2iFtO67cYlRcB/VdVaSNpom3xMShlvev
+    Slp3kvWjRTBDMA4GA1UdDwEB/wQEAwIBBjASBgNVHRMBAf8ECDAGAQH/AgEBMB0G
+    A1UdDgQWBBSlDo48rpzBigp7QjCYE55CB+6vXDAKBggqhkjOPQQDAgNHADBEAiB6
+    1L9vX87Hs9NlWC670HRTmcJCYNcKyZMl8aA72VbdQgIgO1pKNk3uQ+zH5gaQIfA9
+    aoPNveFA7Hfm8SnnstaosHQ=
+    -----END CERTIFICATE-----
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: linkerd-control-plane
+  namespace: linkerd
+spec:
+  repo: https://helm.linkerd.io/stable
+  chart: linkerd-control-plane
+  version: 1.9.3
+  targetNamespace: linkerd
+  valuesContent: |-
+    enablePodDisruptionBudget: true
+    enablePodAntiAffinity: true
+    controllerReplicas: 3
+    deploymentStrategy:
+      rollingUpdate:
+        maxUnavailable: 1
+        maxSurge: 25%
+    identity:
+      externalCA: true
+      issuer:
+        scheme: kubernetes.io/tls
+    webhookFailurePolicy: Fail

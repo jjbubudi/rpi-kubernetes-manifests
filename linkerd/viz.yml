@@ -1,0 +1,19 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: linkerd-viz
+  namespace: linkerd-viz
+spec:
+  repo: https://helm.linkerd.io/stable
+  chart: linkerd-viz
+  version: 30.3.3
+  targetNamespace: linkerd-viz
+  valuesContent: |-
+    prometheus:
+      resources:
+        cpu:
+          limit: 1
+          request: 300m
+        memory:
+          limit: 1Gi
+          request: 300Mi
