@@ -1,4 +1,13 @@
 apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: tides-l5d-header-middleware
+spec:
+  headers:
+    customRequestHeaders:
+      l5d-dst-override: "tides-web.default.svc.cluster.local:80"
+---
+apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
   name: tides
@@ -6,6 +15,8 @@ spec:
   routes:
   - kind: Rule
     match: Host(`tides.jimmyau.cloud`)
+    middlewares:
+    - name: tides-l5d-header-middleware
     services:
     - name: tides-web
       port: 80

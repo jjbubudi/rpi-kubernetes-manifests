@@ -1,4 +1,13 @@
 apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: bookstack-l5d-header-middleware
+spec:
+  headers:
+    customRequestHeaders:
+      l5d-dst-override: "bookstack.default.svc.cluster.local:80"
+---
+apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
   name: bookstack
@@ -6,6 +15,8 @@ spec:
   routes:
   - kind: Rule
     match: Host(`wiki.jimmyau.cloud`)
+    middlewares:
+    - name: bookstack-l5d-header-middleware
     services:
     - name: bookstack
       port: 80

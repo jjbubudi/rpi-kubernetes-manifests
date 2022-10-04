@@ -1,4 +1,13 @@
 apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: poop-l5d-header-middleware
+spec:
+  headers:
+    customRequestHeaders:
+      l5d-dst-override: "poop.default.svc.cluster.local:80"
+---
+apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
   name: poop
@@ -6,6 +15,8 @@ spec:
   routes:
   - kind: Rule
     match: Host(`poop.jimmyau.cloud`)
+    middlewares:
+    - name: poop-l5d-header-middleware
     services:
     - name: poop
       port: 80

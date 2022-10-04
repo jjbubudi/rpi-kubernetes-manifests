@@ -8,6 +8,15 @@ spec:
       X-Forwarded-Proto: https
 ---
 apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: phpmyadmin-l5d-header-middleware
+spec:
+  headers:
+    customRequestHeaders:
+      l5d-dst-override: "phpmyadmin.default.svc.cluster.local:80"
+---
+apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
   name: phpmyadmin
@@ -17,6 +26,7 @@ spec:
     match: Host(`db.jimmyau.cloud`)
     middlewares:
     - name: phpmyadmin-middleware
+    - name: phpmyadmin-l5d-header-middleware
     services:
     - name: phpmyadmin
       port: 80

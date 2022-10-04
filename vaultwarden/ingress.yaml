@@ -1,4 +1,22 @@
 apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: vaultwarden-l5d-header-middleware
+spec:
+  headers:
+    customRequestHeaders:
+      l5d-dst-override: "vaultwarden.default.svc.cluster.local:80"
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: vaultwarden-websocket-l5d-header-middleware
+spec:
+  headers:
+    customRequestHeaders:
+      l5d-dst-override: "vaultwarden.default.svc.cluster.local:3012"
+---
+apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
   name: vaultwarden
@@ -6,11 +24,15 @@ spec:
   routes:
   - kind: Rule
     match: Host(`password.jimmyau.cloud`) && Path(`/notifications/hub`)
+    middlewares:
+    - name: vaultwarden-websocket-l5d-header-middleware
     services:
     - name: vaultwarden
       port: 3012
   - kind: Rule
     match: Host(`password.jimmyau.cloud`)
+    middlewares:
+    - name: vaultwarden-l5d-header-middleware
     services:
     - name: vaultwarden
       port: 80

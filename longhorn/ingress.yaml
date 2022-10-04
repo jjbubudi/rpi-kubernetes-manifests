@@ -1,12 +1,24 @@
 apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: longhorn-frontend-l5d-header-middleware
+  namespace: longhorn-system
+spec:
+  headers:
+    customRequestHeaders:
+      l5d-dst-override: "longhorn-frontend.longhorn-system.svc.cluster.local:80"
+---
+apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: vault
+  name: longhorn-frontend
   namespace: longhorn-system
 spec:
   routes:
   - kind: Rule
     match: Host(`longhorn.jimmyau.cloud`)
+    middlewares:
+    - name: longhorn-frontend-l5d-header-middleware
     services:
     - name: longhorn-frontend
       port: 80

@@ -10,6 +10,16 @@ spec:
       Origin: ""
 ---
 apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: web-l5d-header-middleware
+  namespace: linkerd-viz
+spec:
+  headers:
+    customRequestHeaders:
+      l5d-dst-override: "web.linkerd-viz.svc.cluster.local:8084"
+---
+apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
   name: web
@@ -20,6 +30,7 @@ spec:
     match: Host(`mesh.jimmyau.cloud`)
     middlewares:
     - name: web-middleware
+    - name: web-l5d-header-middleware
     services:
     - name: web
       port: 8084

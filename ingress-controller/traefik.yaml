@@ -18,6 +18,8 @@ spec:
     metadata:
       labels:
         app: traefik
+      annotations:
+        linkerd.io/inject: ingress
     spec:
       serviceAccountName: traefik
       containers:
