@@ -1,0 +1,21 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: ServersTransport
+metadata:
+  name: stackgres-transport
+  namespace: stackgres
+spec:
+  insecureSkipVerify: true
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: stackgres
+  namespace: stackgres
+spec:
+  routes:
+  - kind: Rule
+    match: Host(`stackgres.jimmyau.cloud`)
+    services:
+    - name: stackgres-restapi
+      port: 443
+      serversTransport: stackgres-transport
