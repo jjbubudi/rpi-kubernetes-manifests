@@ -29,7 +29,7 @@ spec:
     spec:
       containers:
       - name: bookstack
-        image: linuxserver/bookstack:version-v21.04.6
+        image: linuxserver/bookstack:22.09.1
         env:
         - name: APP_URL
           value: https://wiki.jimmyau.cloud
